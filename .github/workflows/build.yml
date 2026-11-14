@@ -1,0 +1,45 @@
+name: build-macos
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Apple Silicon runner; CMakeLists pins CMAKE_OSX_ARCHITECTURES=x86_64, so this cross-compiles
+    # the Intel binaries NullMoth needs. Compile + link only: nothing here can run without the driver.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain versions
+        run: |
+          xcodebuild -version
+          clang --version
+          cmake --version
+          which ninja || brew install ninja
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build
+        run: cmake --build build --verbose
+
+      - name: Check architecture and linkage
+        run: |
+          for f in build/nvprime-run build/libnvoffload.dylib build/nvoffload-presenter; do
+            echo "== $f"; lipo -info "$f"; otool -L "$f" | head -20
+          done
+          # The interpose section must exist or DYLD_INSERT_LIBRARIES does nothing useful.
+          otool -l build/libnvoffload.dylib | grep -A2 'sectname __interpose'
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvoffload-macos-x86_64
+          path: |
+            build/nvprime-run
+            build/libnvoffload.dylib
+            build/nvoffload-presenter
+          if-no-files-found: error
