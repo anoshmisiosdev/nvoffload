@@ -1,5 +1,6 @@
 #import "diag/nvo_diag.h"
 #import "diag/ioreg_util.h"
+#import <IOKit/graphics/IOGraphicsLib.h>
 #include <cstdio>
 
 // Print the driver classes attached below a registry entry, up to `depth` levels.
@@ -86,10 +87,11 @@ void nvo_print_framebuffers(void) {
                         CFDictionaryRef info = IODisplayCreateInfoDictionary(c, kIODisplayOnlyPreferredName);
                         NSDictionary *d = CFBridgingRelease(info);
                         NSDictionary *names = d[@"DisplayProductName"];
-                        printf("    display: %s vendor=%@ product=%@ builtin=%@ edid=%s\n",
+                        printf("    display: %s vendor=%s product=%s builtin=%s edid=%s\n",
                                nvo_ioreg_class(c).UTF8String,
-                               d[@"DisplayVendorID"] ?: @"-", d[@"DisplayProductID"] ?: @"-",
-                               d[@"built-in"] ?: @"-", d[@"IODisplayEDID"] ? "yes" : "no");
+                               [(d[@"DisplayVendorID"] ?: @"-") description].UTF8String,
+                               [(d[@"DisplayProductID"] ?: @"-") description].UTF8String,
+                               [(d[@"built-in"] ?: @"-") description].UTF8String, d[@"IODisplayEDID"] ? "yes" : "no");
                         if (names.count) printf("    display name: %s\n", [[names.allValues firstObject] UTF8String]);
                     }
                     IOObjectRelease(c);
