@@ -21,7 +21,7 @@ jobs:
           which ninja || brew install ninja
 
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_OSX_ARCHITECTURES=x86_64
 
       - name: Build
         run: cmake --build build --verbose
@@ -30,6 +30,7 @@ jobs:
         run: |
           for f in build/nvprime-run build/libnvoffload.dylib build/nvoffload-presenter; do
             echo "== $f"; lipo -info "$f"; otool -L "$f" | head -20
+            lipo -info "$f" | grep -q x86_64 || { echo "::error::$f is not x86_64"; exit 1; }
           done
           # The interpose section must exist or DYLD_INSERT_LIBRARIES does nothing useful.
           otool -l build/libnvoffload.dylib | grep -A2 'sectname __interpose'

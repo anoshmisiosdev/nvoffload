@@ -45,7 +45,7 @@ void nvo_print_nullmoth(void) {
         int n = 0;
         for (NSString *bid in [loaded.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             BOOL interesting = [bid hasPrefix:@"com.nullmoth."] || [bid containsString:@"Lilu"] || [bid containsString:@"WhateverGreen"]
-                            || [bid containsString:@"AMFIPass"] || [bid containsString:@"AppleIntel"] && [bid containsString:@"Graphics"]
+                            || [bid containsString:@"AMFIPass"] || ([bid containsString:@"AppleIntel"] && [bid containsString:@"Graphics"])
                             || [bid containsString:@"IONDRVSupport"];
             if (!interesting) continue;
             n++;

@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
+# Must precede project(): CMake reads these when it initialises the toolchain.
+set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "Minimum macOS (NullMoth needs 15.5+)")
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "NullMoth is x86_64 only")
 project(nvoffload VERSION 0.1.0 LANGUAGES C CXX OBJC OBJCXX)
 
 if(NOT APPLE)
@@ -7,8 +10,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "Minimum macOS (NullMoth needs 15.5+)")
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "NullMoth is x86_64 only")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(NVO_BUILD_PRESENTER "Build the standalone IOSurface presenter / smoke test" ON)
