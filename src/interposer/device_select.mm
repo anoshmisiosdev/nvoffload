@@ -91,10 +91,14 @@ extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevices(void) {
     return render_first(MTLCopyAllDevices());
 }
 
-extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(id<NSObject> __autoreleasing _Nullable *_Nonnull observer,
-                                                                     MTLDeviceNotificationHandler handler) NS_RETURNS_RETAINED;
-extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(id<NSObject> __autoreleasing _Nullable *_Nonnull observer,
-                                                                     MTLDeviceNotificationHandler handler) {
+// Take the parameter types from the SDK's own declaration so the interpose tuple always type-matches.
+template <typename T> struct nvo_fn_traits;
+template <typename R, typename A1, typename A2> struct nvo_fn_traits<R(A1, A2)> { using a1 = A1; using a2 = A2; };
+using nvo_ObserverParam = nvo_fn_traits<decltype(MTLCopyAllDevicesWithObserver)>::a1;
+using nvo_HandlerParam  = nvo_fn_traits<decltype(MTLCopyAllDevicesWithObserver)>::a2;
+
+extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(nvo_ObserverParam observer, nvo_HandlerParam handler) NS_RETURNS_RETAINED;
+extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(nvo_ObserverParam observer, nvo_HandlerParam handler) {
     nvo_bridge_install_if_needed();
     return render_first(MTLCopyAllDevicesWithObserver(observer, handler));
 }

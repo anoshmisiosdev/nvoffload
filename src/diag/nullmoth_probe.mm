@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
-#import <IOKit/kext/OSKext.h>
+// OSKext.h is not in the public SDK any more; the symbol is still exported by IOKit.framework.
+extern "C" CFDictionaryRef OSKextCopyLoadedKextInfo(CFArrayRef kextIdentifiers, CFArrayRef infoKeys);
 #import "diag/nvo_diag.h"
 #import "diag/ioreg_util.h"
 #include "common/nvo_env.h"
