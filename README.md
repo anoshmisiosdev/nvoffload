@@ -99,6 +99,25 @@ WhateverXe's own caveats: sleep/wake experimental and untested on Tiger Lake, US
 no Thunderbolt/MST output. Surface Laptop Studio has only USB-C/Thunderbolt outputs, so external displays are a
 risk area regardless of the NVIDIA side.
 
+## NVOffload.app (menu bar agent)
+
+`NVOffload.app` bundles `libnvoffload.dylib` and `nvprime-run` and makes the redirect automatic:
+
+- **Offload mode**: Off / Listed apps only / All third-party apps. The choice is written to
+  `~/Library/Application Support/nvoffload/policy.json` and applied to the login session with `launchctl setenv`
+  (`DYLD_INSERT_LIBRARIES`, `NVOFFLOAD_POLICY`, `NVOFFLOAD_DEVICE=nvidia`, `MVK_CONFIG_FORCE_LOW_POWER_GPU=0`), so apps
+  launched afterwards from Finder or the Dock load the dylib. The dylib reads the policy once at load and stays inert in
+  processes it does not match (Apple bundle ids, nvoffload's own tools, anything excluded).
+- **Heavy-app suggestions**: every 2 s the agent reads each IOAccelerator's `PerformanceStatistics`. When a non-Apple
+  frontmost app keeps the Intel GPU at 60 % or more for 8 s while the NVIDIA GPU idles, a notification offers to add it
+  to the list for its next launch. Nothing changes without that click.
+- **Launch an App on the NVIDIA GPU…** runs one app once through `nvprime-run`, regardless of the policy.
+- **Start at Login** writes `~/Library/LaunchAgents/org.nvoffload.agent.plist`; the agent re-applies the session
+  environment at every start because `launchctl setenv` does not persist across logins.
+
+Policy file schema: `{"mode": "off|allowlist|all", "apps": ["bundle.id" | "ExecutableName"], "exclude": [...]}`.
+Children inherit the environment, so a game started by a launcher such as Steam is evaluated on its own bundle id.
+
 ## Vulkan
 
 MoltenVK follows the interposed default device via `MVK_CONFIG_FORCE_LOW_POWER_GPU=0`. Apps that enumerate and filter
