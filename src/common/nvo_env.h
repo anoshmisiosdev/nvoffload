@@ -8,6 +8,7 @@
 #define NVO_ENV_BRIDGE       "NVOFFLOAD_BRIDGE"    // 1 (default) = cross-GPU present bridge on when two devices exist; 0 = off
 #define NVO_ENV_TRACE_PRESENT "NVOFFLOAD_TRACE_PRESENT" // 1 = log every CAMetalLayer nextDrawable / present
 #define NVO_ENV_LIB          "NVOFFLOAD_LIB"       // launcher: explicit path to libnvoffload.dylib
+#define NVO_ENV_POLICY       "NVOFFLOAD_POLICY"    // path to policy.json (set session-wide by NVOffload.app); absent = always active
 
 // ---- NullMoth (nullmoth/nvidia-macos-driver) --------------------------------------------
 // Read by NVMTLDriver.bundle / libnvmtl_translate / NVK. nvoffload never clears these; the

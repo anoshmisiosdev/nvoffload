@@ -45,7 +45,8 @@ add_library(nvoffload SHARED
   src/interposer/init.mm
   src/interposer/device_select.mm
   src/interposer/moltenvk_env.mm
-  src/interposer/present_bridge.mm)
+  src/interposer/present_bridge.mm
+  src/interposer/policy.mm)
 target_include_directories(nvoffload PRIVATE src)
 target_link_libraries(nvoffload PRIVATE nvo_common ${NVO_CORE_FRAMEWORKS})
 set_target_properties(nvoffload PROPERTIES
@@ -69,6 +70,27 @@ if(NVO_BUILD_PRESENTER)
   target_include_directories(nvoffload-presenter PRIVATE src)
   target_link_libraries(nvoffload-presenter PRIVATE nvo_common ${NVO_CORE_FRAMEWORKS} ${NVO_FW_AppKit})
 endif()
+
+# ---------------------------------------------------------------- NVOffload.app (menu bar agent)
+find_library(NVO_FW_UserNotifications UserNotifications REQUIRED)
+find_library(NVO_FW_UniformTypeIdentifiers UniformTypeIdentifiers REQUIRED)
+add_executable(NVOffload MACOSX_BUNDLE
+  src/agent/main.mm
+  src/agent/NVOAppDelegate.mm)
+target_include_directories(NVOffload PRIVATE src)
+target_link_libraries(NVOffload PRIVATE ${NVO_FW_AppKit} ${NVO_FW_Foundation} ${NVO_FW_IOKit} ${NVO_FW_UserNotifications} ${NVO_FW_UniformTypeIdentifiers})
+set_target_properties(NVOffload PROPERTIES
+  MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/src/agent/Info.plist.in
+  MACOSX_BUNDLE_BUNDLE_NAME NVOffload
+  MACOSX_BUNDLE_GUI_IDENTIFIER org.nvoffload.agent
+  MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+  MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
+add_dependencies(NVOffload nvoffload nvprime-run)
+# The agent expects libnvoffload.dylib and nvprime-run next to its own binary inside the bundle.
+add_custom_command(TARGET NVOffload POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nvoffload> $<TARGET_FILE_DIR:NVOffload>/libnvoffload.dylib
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nvprime-run> $<TARGET_FILE_DIR:NVOffload>/nvprime-run
+  COMMENT "Bundling libnvoffload.dylib and nvprime-run into NVOffload.app")
 
 install(TARGETS nvoffload nvprime-run
   RUNTIME DESTINATION bin

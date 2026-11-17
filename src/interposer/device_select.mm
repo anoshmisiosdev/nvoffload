@@ -1,5 +1,6 @@
 #import "interposer/device_select.h"
 #import "interposer/present_bridge.h"
+#import "interposer/policy.h"
 #include "common/nvo_log.h"
 #include "common/nvo_env.h"
 #include <dispatch/dispatch.h>
@@ -79,6 +80,7 @@ static NSArray<id<MTLDevice>> *render_first(NSArray<id<MTLDevice>> *all) {
 
 extern "C" id<MTLDevice> nvo_MTLCreateSystemDefaultDevice(void) NS_RETURNS_RETAINED;
 extern "C" id<MTLDevice> nvo_MTLCreateSystemDefaultDevice(void) {
+    if (!nvo_policy_active()) return MTLCreateSystemDefaultDevice();
     nvo_bridge_install_if_needed();
     id<MTLDevice> r = nvo_render_device();
     if (r) { NVO_TRACE("MTLCreateSystemDefaultDevice -> %s", r.name.UTF8String); return r; }
@@ -87,6 +89,7 @@ extern "C" id<MTLDevice> nvo_MTLCreateSystemDefaultDevice(void) {
 
 extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevices(void) NS_RETURNS_RETAINED;
 extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevices(void) {
+    if (!nvo_policy_active()) return MTLCopyAllDevices();
     nvo_bridge_install_if_needed();
     return render_first(MTLCopyAllDevices());
 }
@@ -96,6 +99,7 @@ extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(id<NSObject
                                                                      MTLDeviceNotificationHandler handler) NS_RETURNS_RETAINED;
 extern "C" NSArray<id<MTLDevice>> *nvo_MTLCopyAllDevicesWithObserver(id<NSObject> __nullable __strong *__nonnull observer,
                                                                      MTLDeviceNotificationHandler handler) {
+    if (!nvo_policy_active()) return MTLCopyAllDevicesWithObserver(observer, handler);
     nvo_bridge_install_if_needed();
     return render_first(MTLCopyAllDevicesWithObserver(observer, handler));
 }

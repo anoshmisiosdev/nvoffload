@@ -1,5 +1,6 @@
 #import "interposer/present_bridge.h"
 #import "interposer/device_select.h"
+#import "interposer/policy.h"
 #import <QuartzCore/CAMetalLayer.h>
 #import <IOSurface/IOSurface.h>
 #import <objc/runtime.h>
@@ -237,6 +238,7 @@ static IMP swizzle(Class c, SEL sel, IMP repl) {
 }
 
 void nvo_bridge_install_if_needed(void) {
+    if (!nvo_policy_active()) return;
     bool expected = false;
     if (!gInstalled.compare_exchange_strong(expected, true)) return;
     const char *t = getenv(NVO_ENV_TRACE_PRESENT); gTrace = t && atoi(t) != 0;
