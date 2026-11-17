@@ -1,5 +1,6 @@
 #import "NVOAppDelegate.h"
 #import <UserNotifications/UserNotifications.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <IOKit/IOKitLib.h>
 #include "common/nvo_env.h"
 
@@ -214,7 +215,7 @@ static NSString *const kDefaultsSuggest = @"SuggestHeavyApps";
     [self loadPolicy];
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     NSImage *img = [NSImage imageWithSystemSymbolName:@"gpu" accessibilityDescription:@"NVOffload"] ?: [NSImage imageWithSystemSymbolName:@"cpu" accessibilityDescription:@"NVOffload"];
-    if (img) { img.template = YES; self.statusItem.button.image = img; } else self.statusItem.button.title = @"NV";
+    if (img) { [img setTemplate:YES]; self.statusItem.button.image = img; } else self.statusItem.button.title = @"NV";
     UNUserNotificationCenter *nc = [UNUserNotificationCenter currentNotificationCenter]; nc.delegate = self;
     UNNotificationAction *addAct = [UNNotificationAction actionWithIdentifier:@"nvo.add" title:@"Offload it" options:UNNotificationActionOptionNone];
     [nc setNotificationCategories:[NSSet setWithObject:[UNNotificationCategory categoryWithIdentifier:@"nvo.suggest" actions:@[addAct] intentIdentifiers:@[] options:0]]];
